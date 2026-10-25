@@ -248,10 +248,9 @@ class EpubReader:
                 if a.tag == f"{{{NAMESPACES['DAISY']}}}navPoint":
                     children.append(_get_children(a, n + 1, a.get("id", "")))
 
+            if n == 0:
+                return children
             if len(children) > 0:
-                if n == 0:
-                    return children
-
                 return (Section(label, href=content), children)
             else:
                 return Link(content, label, nid)
