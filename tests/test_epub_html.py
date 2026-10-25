@@ -1,6 +1,7 @@
 import logging
 from typing import cast
 
+import pytest
 from lxml import etree
 
 import ebooklib
@@ -99,3 +100,14 @@ class TestEpubHtml:
         doc1.set_language("de")
         html_tree = parse_html_string(doc1.get_content())
         assert html_tree.attrib["lang"] == "de"
+
+
+@pytest.mark.parametrize("content", ["Plain text &amp; symbols", "Before <em>inside</em> after"])
+def test_body_text_is_preserved(content):
+    book = epub.EpubBook()
+    doc = epub.EpubHtml(file_name="chapter.xhtml", content=f"<body>{content}</body>")
+    book.add_item(doc)
+    expected = parse_html_string(f"<body>{content}</body>").find("body").text_content()
+
+    assert parse_html_string(doc.get_content()).find("body").text_content() == expected
+    assert parse_html_string(doc.get_body_content()).find("body").text_content() == expected
