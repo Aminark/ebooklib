@@ -305,7 +305,7 @@ class EpubHtml(EpubItem):
 
         body = html_tree.find("body")
 
-        if body is not None and len(body) != 0:
+        if body is not None and (len(body) != 0 or body.text):
             tree_str = etree.tostring(body, pretty_print=True, encoding="utf-8", xml_declaration=False)
 
             # this is so stupid
@@ -381,6 +381,7 @@ class EpubHtml(EpubItem):
 
         body = html_tree.find("body")
         if body is not None:
+            _body.text = body.text
             for i in list(body):
                 _body.append(i)
 
