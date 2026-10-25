@@ -135,7 +135,7 @@ class EpubReader:
             else:
                 tag = t.tag[t.tag.rfind("}") + 1 :]
 
-                if (t.prefix and t.prefix.lower() == "dc") and tag == "identifier":
+                if not unique_identifier and (t.prefix and t.prefix.lower() == "dc") and tag == "identifier":
                     _id = t.get("id", None)
 
                     if _id:
