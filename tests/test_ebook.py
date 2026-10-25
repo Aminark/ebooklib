@@ -122,7 +122,7 @@ class TestEbook:
         f.seek(0)
 
         bk = epub.read_epub(f, {"ignore_ncx": False})
-        assert type(bk.toc) is epub.Link
+        assert bk.toc == []
 
         bk = epub.read_epub(f, {"ignore_ncx": True})
         assert len(bk.toc) == 0
@@ -433,3 +433,19 @@ class TestEbook:
 
     def test_epubbook_read_epub_as_bytes(self):
         self._test_epubbook(io.BytesIO((Path(__file__).parent / "resources" / "test01.epub").open("rb").read()))
+
+
+def test_empty_ncx_toc_survives_round_trip():
+    book = epub.EpubBook()
+    book.set_title("Empty table of contents")
+    chapter = epub.EpubHtml(file_name="chapter.xhtml", content="<p>Chapter</p>")
+    book.add_item(chapter)
+    book.add_item(epub.EpubNcx())
+    book.spine = [chapter]
+    archive = io.BytesIO()
+    epub.write_epub(archive, book)
+    archive.seek(0)
+
+    restored = epub.read_epub(archive)
+    assert restored.toc == []
+    epub.write_epub(io.BytesIO(), restored)
