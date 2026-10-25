@@ -112,6 +112,29 @@ class TestEbook:
 
         self._test_basic_book(epub.read_epub(os.path.join(str(session_temp_dir), "test_basic.epub")))
 
+    @pytest.mark.parametrize("primary_first", [True, False])
+    def test_read_preserves_package_identifier(self, primary_first):
+        book = self._create_basic_book()
+        book.add_metadata("DC", "identifier", "9781234567890", {"id": "isbn"})
+        if not primary_first:
+            book.get_metadata("DC", "identifier").reverse()
+
+        source = io.BytesIO()
+        epub.write_epub(source, book)
+        source.seek(0)
+        loaded = epub.read_epub(source)
+
+        assert loaded.IDENTIFIER_ID == "id"
+        assert loaded.uid == "test123456"
+        assert len(loaded.get_metadata("DC", "identifier")) == 2
+
+        destination = io.BytesIO()
+        epub.write_epub(destination, loaded)
+        destination.seek(0)
+        with zipfile.ZipFile(destination) as archive:
+            package = parse_string(archive.read("EPUB/content.opf"))
+        assert package.getroot().get("unique-identifier") == "id"
+
     def test_basic_read_options(self):
         book = self._create_basic_book()
         book.toc = []
