@@ -433,3 +433,21 @@ class TestEbook:
 
     def test_epubbook_read_epub_as_bytes(self):
         self._test_epubbook(io.BytesIO((Path(__file__).parent / "resources" / "test01.epub").open("rb").read()))
+
+
+@pytest.mark.parametrize(
+    "item_class, prefix",
+    [(epub.EpubHtml, "chapter"), (epub.EpubImage, "image"), (epub.EpubItem, "static")],
+)
+def test_generated_item_ids_skip_existing_ids(item_class, prefix):
+    book = epub.EpubBook()
+    first = book.add_item(epub.EpubItem(uid=f"{prefix}_0", file_name="first.dat"))
+    second = book.add_item(epub.EpubItem(uid=f"{prefix}_1", file_name="second.dat"))
+    generated = book.add_item(item_class(file_name="generated.dat"))
+    following = book.add_item(item_class(file_name="following.dat"))
+
+    assert generated.id == f"{prefix}_2"
+    assert following.id == f"{prefix}_3"
+    assert book.get_item_with_id(f"{prefix}_0") is first
+    assert book.get_item_with_id(f"{prefix}_1") is second
+    assert book.get_item_with_id(generated.id) is generated
