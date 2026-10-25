@@ -31,6 +31,7 @@ Changed
 
 Fixed
 ~~~~~
+* Return an empty list when get_metadata is called for a missing namespace
 * Security: prevent path traversal when reading an unpacked EPUB from a directory
   (a crafted manifest href like ../../etc/passwd could read files outside the book directory);
   Directory.read() raises OSError for paths escaping the source directory
